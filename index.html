@@ -260,8 +260,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* UI fade during interaction */
-        body.interacting .panel,
+        /* UI fade during interaction - mobile only */
         body.interacting .mobile-panel {
             opacity: 0;
             pointer-events: none;
@@ -678,7 +677,6 @@
 
         function draw() {
             if (mouseIsPressed && img && !isMobile) {
-                startInteraction();
                 drawStretch(mouseX, mouseY);
             }
         }
@@ -701,7 +699,9 @@
             drawingContext.globalCompositeOperation = 'source-over';
         }
 
-        function mouseReleased() { endInteraction(); }
+        function mouseReleased() {
+            // Desktop doesn't use interaction tracking
+        }
 
         function touchStarted() {
             if (!isMobile || !img) return true;
