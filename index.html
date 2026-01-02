@@ -404,16 +404,13 @@
 
         <div class="controls-section">
             <div class="control-group">
-                <div class="control-label"><span>Width</span><span class="control-value" id="widthValue">2</span></div>
-                <input type="range" id="widthSlider" min="1" max="100" value="2">
+                <div class="control-label"><span>Width</span><span class="control-value" id="widthValue">12</span></div>
+                <input type="range" id="widthSlider" min="1" max="100" value="12">
             </div>
 
 
 
-            <div class="toggle-row">
-                <button class="toggle-btn active" id="modeH">Horizontal</button>
-                <button class="toggle-btn" id="modeV">Vertical</button>
-            </div>
+
 
             <div class="control-group" style="gap: 6px;">
                 <button class="btn btn-primary" id="exportBtn">Export</button>
@@ -437,15 +434,12 @@
             </div>
 
             <div class="control-group">
-                <div class="control-label"><span>Width</span><span class="control-value" id="mobileWidthValue">2</span>
+                <div class="control-label"><span>Width</span><span class="control-value" id="mobileWidthValue">12</span>
                 </div>
-                <input type="range" id="mobileWidthSlider" min="1" max="100" value="2">
+                <input type="range" id="mobileWidthSlider" min="1" max="100" value="12">
             </div>
 
-            <div class="toggle-row">
-                <button class="toggle-btn active" id="mobileModeH">Horizontal</button>
-                <button class="toggle-btn" id="mobileModeV">Vertical</button>
-            </div>
+
         </div>
     </div>
 
@@ -461,7 +455,7 @@
         let hasImage = false;
         let touchDrawing = false;
 
-        let params = { width: 2, opacity: 180, mode: 'Horizontal', blend: 'source-over' };
+        let params = { width: 12 };
 
         function setup() {
             canvas = createCanvas(windowWidth, isMobile ? windowHeight - 180 : windowHeight);
@@ -489,17 +483,7 @@
 
 
 
-            document.getElementById('modeH').addEventListener('click', (e) => {
-                params.mode = 'Horizontal';
-                e.target.classList.add('active');
-                document.getElementById('modeV').classList.remove('active');
-            });
 
-            document.getElementById('modeV').addEventListener('click', (e) => {
-                params.mode = 'Vertical';
-                e.target.classList.add('active');
-                document.getElementById('modeH').classList.remove('active');
-            });
 
             // Mobile controls
             document.getElementById('mobileUploadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
@@ -513,17 +497,7 @@
 
 
 
-            document.getElementById('mobileModeH').addEventListener('click', (e) => {
-                params.mode = 'Horizontal';
-                e.target.classList.add('active');
-                document.getElementById('mobileModeV').classList.remove('active');
-            });
 
-            document.getElementById('mobileModeV').addEventListener('click', (e) => {
-                params.mode = 'Vertical';
-                e.target.classList.add('active');
-                document.getElementById('mobileModeH').classList.remove('active');
-            });
 
             // Drag and drop
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
@@ -634,23 +608,16 @@
         function drawStretch(x, y) {
             if (!img) return;
 
-            // Pure pixel displacement - no blending, no opacity modification
+            // Pure pixel displacement from original image only
             noTint();
 
+            // Map screen position to original image coordinates
             let imgX = floor(map(x, 0, width, 0, img.width));
-            let imgY = floor(map(y, 0, height, 0, img.height));
             imgX = constrain(imgX, 0, img.width - 1);
-            imgY = constrain(imgY, 0, img.height - 1);
 
-            if (params.mode === 'Horizontal') {
-                // Get vertical slice and stretch horizontally
-                let slice = img.get(imgX, 0, 1, img.height);
-                image(slice, x, 0, params.width, height);
-            } else {
-                // Get horizontal slice and stretch vertically
-                let slice = img.get(0, imgY, img.width, 1);
-                image(slice, 0, y, width, params.width);
-            }
+            // Sample vertical slice from original and stretch horizontally
+            let slice = img.get(imgX, 0, 1, img.height);
+            image(slice, x, 0, params.width, height);
         }
 
         function mouseReleased() {
