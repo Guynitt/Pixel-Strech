@@ -573,46 +573,97 @@
 
         function exportImage() {
             const filename = `pixel_stretch_${Date.now()}.png`;
+            const exportBtn = isMobile ? document.getElementById('mobileExportBtn') : null;
 
             if (isMobile) {
-                // Convert canvas to blob
-                canvas.elt.toBlob(async (blob) => {
-                    const file = new File([blob], filename, { type: 'image/png' });
+                // Show saving state
+                if (exportBtn) {
+                    exportBtn.disabled = true;
+                    exportBtn.textContent = 'Saving…';
+                }
 
-                    // Try Web Share API first (native share sheet)
-                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Pixel Stretch'
-                            });
-                            showToast('Shared');
-                        } catch (err) {
-                            // User cancelled or error - fall back to download
-                            if (err.name !== 'AbortError') {
-                                downloadBlob(blob, filename);
-                            }
+                try {
+                    canvas.elt.toBlob(async (blob) => {
+                        if (!blob) {
+                            showToast('Export failed');
+                            resetExportBtn(exportBtn);
+                            return;
                         }
-                    } else {
-                        // Fallback: trigger download
-                        downloadBlob(blob, filename);
-                    }
-                }, 'image/png');
+
+                        try {
+                            const file = new File([blob], filename, { type: 'image/png' });
+
+                            // Try Web Share API first (native share sheet)
+                            if (navigator.share && navigator.canShare) {
+                                try {
+                                    const canShareFiles = navigator.canShare({ files: [file] });
+                                    if (canShareFiles) {
+                                        await navigator.share({
+                                            files: [file],
+                                            title: 'Pixel Stretch'
+                                        });
+                                        showToast('Saved');
+                                        resetExportBtn(exportBtn);
+                                        return;
+                                    }
+                                } catch (shareErr) {
+                                    if (shareErr.name === 'AbortError') {
+                                        // User cancelled
+                                        resetExportBtn(exportBtn);
+                                        return;
+                                    }
+                                    // Fall through to download
+                                }
+                            }
+
+                            // Fallback: direct download
+                            downloadBlob(blob, filename);
+                            resetExportBtn(exportBtn);
+
+                        } catch (err) {
+                            showToast('Export failed');
+                            resetExportBtn(exportBtn);
+                        }
+                    }, 'image/png');
+                } catch (err) {
+                    showToast('Export failed');
+                    resetExportBtn(exportBtn);
+                }
             } else {
                 saveCanvas(filename.replace('.png', ''), 'png');
             }
         }
 
+        function resetExportBtn(btn) {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Export';
+            }
+        }
+
         function downloadBlob(blob, filename) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('Saved');
+            try {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                a.target = '_blank';
+                document.body.appendChild(a);
+
+                // Use setTimeout to ensure the click happens
+                setTimeout(() => {
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                }, 0);
+
+                showToast('Saved');
+            } catch (err) {
+                showToast('Export failed');
+            }
         }
 
         function showToast(msg) {
