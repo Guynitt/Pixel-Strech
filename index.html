@@ -7,10 +7,10 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pixel Stretcher v2.0</title>
+    <title>Pixel Stretcher</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tweakpane@3.0.7/dist/tweakpane.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -45,34 +45,26 @@
             position: fixed;
             bottom: 20px;
             left: 20px;
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.25);
             text-transform: uppercase;
             pointer-events: none;
             font-weight: 300;
-        }
-
-        .ui-label span {
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 500;
+            transition: opacity 0.15s ease;
         }
 
         .ui-credit {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            font-size: 10px;
-            letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.3);
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.2);
             text-transform: uppercase;
             pointer-events: none;
             font-weight: 300;
-        }
-
-        .ui-credit span {
-            color: rgba(255, 255, 255, 0.5);
-            font-weight: 500;
+            transition: opacity 0.15s ease;
         }
 
         /* Drag & Drop Overlay */
@@ -82,16 +74,15 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(10, 10, 20, 0.9);
-            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.95);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.15s ease;
             z-index: 1000;
         }
 
@@ -100,49 +91,47 @@
             pointer-events: all;
         }
 
-        .drop-overlay-icon {
-            width: 80px;
-            height: 80px;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 0.6;
-            }
-
-            50% {
-                transform: scale(1.05);
-                opacity: 1;
-            }
-        }
-
         .drop-overlay-text {
-            font-size: 14px;
+            font-size: 11px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.4);
         }
 
-        /* Glassmorphism Tweakpane Overrides */
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            z-index: 1001;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Glassmorphism Tweakpane */
         .tp-dfwv {
             background: rgba(20, 20, 30, 0.6) !important;
             backdrop-filter: blur(20px) saturate(180%) !important;
             -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 16px !important;
-            box-shadow:
-                0 8px 32px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            transition: opacity 0.15s ease !important;
         }
 
         .tp-rotv {
@@ -175,7 +164,7 @@
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 8px !important;
             color: rgba(255, 255, 255, 0.9) !important;
-            transition: all 0.2s ease !important;
+            transition: all 0.1s ease !important;
         }
 
         .tp-sldtxtv_t:hover,
@@ -206,10 +195,6 @@
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%) !important;
         }
 
-        .tp-btnv_b:active {
-            transform: scale(0.98) !important;
-        }
-
         .tp-fldv_t {
             background: rgba(255, 255, 255, 0.03) !important;
             border-radius: 8px !important;
@@ -230,71 +215,18 @@
             margin: 8px 0 !important;
         }
 
-        /* ========================================
-           MOBILE STYLES (< 768px)
-           ======================================== */
+        /* UI fade during interaction */
+        body.interacting .tp-dfwv,
+        body.interacting .ui-label,
+        body.interacting .ui-credit,
+        body.interacting .mobile-panel {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
 
-        /* Mobile Control Panel - Hidden by default */
+        /* Mobile Panel - Hidden by default */
         .mobile-panel {
             display: none;
-        }
-
-        /* Hint Overlay */
-        .hint-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            opacity: 1;
-            transition: opacity 0.4s ease;
-        }
-
-        .hint-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .hint-content {
-            text-align: center;
-            padding: 32px;
-            max-width: 320px;
-        }
-
-        .hint-icon {
-            font-size: 64px;
-            margin-bottom: 24px;
-        }
-
-        .hint-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .hint-text {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-
-        .hint-dismiss {
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            touch-action: manipulation;
         }
 
         @media (max-width: 767px) {
@@ -303,86 +235,78 @@
             }
 
             #canvas-container {
-                height: calc(100dvh - 280px);
-                height: calc(100vh - 280px);
+                height: calc(100dvh - 200px);
+                height: calc(100vh - 200px);
             }
 
-            /* Hide Tweakpane on mobile */
             .tp-dfwv {
                 display: none !important;
             }
 
-            /* Hide desktop labels on mobile */
             .ui-label,
             .ui-credit {
                 display: none;
             }
 
-            /* Show mobile panel */
             .mobile-panel {
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 10px;
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: rgba(15, 15, 20, 0.95);
-                backdrop-filter: blur(20px) saturate(180%);
-                -webkit-backdrop-filter: blur(20px) saturate(180%);
-                border-top: 1px solid rgba(255, 255, 255, 0.08);
-                padding: 16px;
-                padding-bottom: max(16px, env(safe-area-inset-bottom));
+                background: rgba(12, 12, 16, 0.98);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                padding: 14px 16px;
+                padding-bottom: max(14px, env(safe-area-inset-bottom));
                 z-index: 100;
-            }
-
-            /* Show hint overlay on mobile */
-            .hint-overlay {
-                display: flex;
+                transition: opacity 0.15s ease;
             }
 
             .button-row {
                 display: flex;
-                gap: 10px;
+                gap: 8px;
             }
 
             .btn {
                 flex: 1;
                 min-height: 48px;
                 border: none;
-                border-radius: 12px;
+                border-radius: 10px;
                 font-family: inherit;
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 500;
-                letter-spacing: 0.5px;
+                letter-spacing: 0.3px;
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
-                transition: all 0.2s ease;
+                gap: 6px;
+                transition: opacity 0.1s ease, transform 0.1s ease;
                 touch-action: manipulation;
             }
 
             .btn-primary {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             }
 
-            .btn-primary:active {
-                transform: scale(0.97);
+            .btn-primary.secondary {
+                background: rgba(255, 255, 255, 0.08);
+                color: rgba(255, 255, 255, 0.7);
             }
 
             .btn-secondary {
-                background: rgba(255, 255, 255, 0.08);
-                color: rgba(255, 255, 255, 0.9);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                background: rgba(255, 255, 255, 0.05);
+                color: rgba(255, 255, 255, 0.5);
+                border: 1px solid rgba(255, 255, 255, 0.06);
             }
 
-            .btn-secondary:active {
-                background: rgba(255, 255, 255, 0.12);
-                transform: scale(0.97);
+            .btn:active {
+                transform: scale(0.98);
             }
 
             .controls-row {
@@ -398,128 +322,87 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 6px;
-                font-size: 11px;
+                margin-bottom: 4px;
+                font-size: 10px;
                 text-transform: uppercase;
-                letter-spacing: 1px;
-                color: rgba(255, 255, 255, 0.5);
+                letter-spacing: 0.5px;
+                color: rgba(255, 255, 255, 0.35);
             }
 
             .control-value {
-                color: rgba(255, 255, 255, 0.8);
-                font-weight: 500;
+                color: rgba(255, 255, 255, 0.5);
             }
 
             input[type="range"] {
                 width: 100%;
-                height: 44px;
+                height: 36px;
                 -webkit-appearance: none;
-                appearance: none;
                 background: transparent;
                 cursor: pointer;
             }
 
             input[type="range"]::-webkit-slider-track {
-                height: 6px;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 3px;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.08);
+                border-radius: 2px;
             }
 
             input[type="range"]::-webkit-slider-thumb {
                 -webkit-appearance: none;
-                width: 24px;
-                height: 24px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                width: 20px;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.9);
                 border-radius: 50%;
-                margin-top: -9px;
-                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+                margin-top: -8px;
             }
 
             input[type="range"]::-moz-range-track {
-                height: 6px;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 3px;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.08);
+                border-radius: 2px;
                 border: none;
             }
 
             input[type="range"]::-moz-range-thumb {
-                width: 24px;
-                height: 24px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                width: 20px;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.9);
                 border-radius: 50%;
                 border: none;
             }
 
             .toggle-row {
                 display: flex;
-                gap: 8px;
+                gap: 6px;
             }
 
             .toggle-btn {
                 flex: 1;
-                min-height: 44px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 10px;
-                background: rgba(255, 255, 255, 0.05);
-                color: rgba(255, 255, 255, 0.6);
+                min-height: 36px;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.03);
+                color: rgba(255, 255, 255, 0.4);
                 font-family: inherit;
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 500;
                 cursor: pointer;
-                transition: all 0.2s ease;
+                transition: all 0.1s ease;
                 touch-action: manipulation;
             }
 
             .toggle-btn.active {
-                background: rgba(102, 126, 234, 0.2);
-                border-color: rgba(102, 126, 234, 0.4);
-                color: white;
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.12);
+                color: rgba(255, 255, 255, 0.8);
             }
 
             .toggle-btn:active {
-                transform: scale(0.97);
+                transform: scale(0.98);
             }
 
-            .settings-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
-                padding: 8px;
-                font-size: 11px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                color: rgba(255, 255, 255, 0.4);
-                cursor: pointer;
-                border: none;
-                background: none;
-            }
-
-            .settings-toggle-icon {
-                transition: transform 0.3s ease;
-            }
-
-            .settings-toggle.expanded .settings-toggle-icon {
-                transform: rotate(180deg);
-            }
-
-            .advanced-settings {
-                display: none;
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .advanced-settings.visible {
-                display: flex;
-            }
-
-            .mobile-credit {
-                text-align: center;
-                font-size: 9px;
-                letter-spacing: 0.5px;
-                color: rgba(255, 255, 255, 0.25);
-                text-transform: uppercase;
-                padding-top: 8px;
+            .toast {
+                bottom: 220px;
             }
         }
     </style>
@@ -528,458 +411,286 @@
 <body>
     <div id="canvas-container"></div>
     <div class="drop-overlay" id="dropOverlay">
-        <div class="drop-overlay-icon">📷</div>
-        <div class="drop-overlay-text">Drop image to load</div>
+        <div class="drop-overlay-text">Drop to load</div>
     </div>
-    <div class="ui-label">
-        <span>Pixel Stretcher</span> v2.0 — Press 'U' to upload or drag & drop
-    </div>
-    <div class="ui-credit">
-        AI Creative Coding Experiment _02 · Created by <span>Guy Nittenberg</span>
-    </div>
+    <div class="ui-label">Pixel Stretcher</div>
+    <div class="ui-credit">Experiment _02 · Guy Nittenberg</div>
+    <div class="toast" id="toast">Saved</div>
 
-    <!-- Mobile-Only Panel -->
+    <!-- Mobile Panel -->
     <div class="mobile-panel" id="mobilePanel">
         <div class="button-row">
-            <button class="btn btn-primary" id="mobileUploadBtn">
-                <span>📷</span> Upload
-            </button>
-            <button class="btn btn-secondary" id="mobileResetBtn">
-                <span>↺</span> Reset
-            </button>
-            <button class="btn btn-secondary" id="mobileExportBtn">
-                <span>⬇</span> Export
-            </button>
+            <button class="btn btn-primary" id="mobileUploadBtn">Upload</button>
+            <button class="btn btn-primary secondary" id="mobileExportBtn">Export</button>
+            <button class="btn btn-secondary" id="mobileResetBtn">Reset</button>
         </div>
-
         <div class="controls-row">
             <div class="control-group">
-                <div class="control-label">
-                    <span>Width</span>
-                    <span class="control-value" id="mobileWidthValue">2</span>
+                <div class="control-label"><span>Width</span><span class="control-value" id="mobileWidthValue">2</span>
                 </div>
                 <input type="range" id="mobileWidthSlider" min="1" max="100" value="2">
             </div>
             <div class="control-group">
-                <div class="control-label">
-                    <span>Alpha</span>
-                    <span class="control-value" id="mobileAlphaValue">180</span>
-                </div>
+                <div class="control-label"><span>Alpha</span><span class="control-value"
+                        id="mobileAlphaValue">180</span></div>
                 <input type="range" id="mobileAlphaSlider" min="0" max="255" value="180">
             </div>
         </div>
-
         <div class="toggle-row">
             <button class="toggle-btn active" id="mobileModeH">Horizontal</button>
             <button class="toggle-btn" id="mobileModeV">Vertical</button>
-        </div>
-
-        <button class="settings-toggle" id="mobileSettingsToggle">
-            <span>More Settings</span>
-            <span class="settings-toggle-icon">▼</span>
-        </button>
-
-        <div class="advanced-settings" id="mobileAdvancedSettings">
-            <div class="controls-row">
-                <div class="control-group">
-                    <div class="control-label">
-                        <span>Scatter</span>
-                        <span class="control-value" id="mobileScatterValue">0</span>
-                    </div>
-                    <input type="range" id="mobileScatterSlider" min="0" max="50" value="0">
-                </div>
-            </div>
-
-            <div class="toggle-row">
-                <button class="toggle-btn" id="mobileMirrorToggle">Mirror</button>
-                <button class="toggle-btn active" id="mobileBlendNormal">Normal</button>
-                <button class="toggle-btn" id="mobileBlendScreen">Screen</button>
-                <button class="toggle-btn" id="mobileBlendDiff">Diff</button>
-            </div>
-        </div>
-
-        <div class="mobile-credit">
-            Experiment _02 · Guy Nittenberg
+            <button class="toggle-btn" id="mobileMirrorToggle">Mirror</button>
         </div>
     </div>
 
-    <!-- Mobile Hint Overlay -->
-    <div class="hint-overlay" id="hintOverlay">
-        <div class="hint-content">
-            <div class="hint-icon">✨</div>
-            <div class="hint-title">Pixel Stretcher</div>
-            <div class="hint-text">
-                Tap <strong>Upload</strong> to load an image, then drag on the canvas to create stunning pixel-stretch
-                effects.
-            </div>
-            <button class="hint-dismiss" id="hintDismiss">Got It</button>
-        </div>
-    </div>
-
-    <!-- Hidden file input for mobile -->
     <input type="file" id="mobileFileInput" accept="image/*" style="display: none;">
 
     <script>
-        // ============================================
-        // Configuration
-        // ============================================
         const MAX_IMAGE_DIMENSION = 2048;
         const MAX_DPR = 2;
 
-        let img;
-        let originalImg; // Store original for mobile downscaling
-        let canvas;
-        let pane;
+        let img, baseLayer;
+        let canvas, pane;
         let isMobile = window.innerWidth < 768;
+        let interactionTimeout = null;
+        let hasImage = false;
 
-        let params = {
-            width: 2,
-            opacity: 180,
-            mode: 'Horizontal',
-            blend: 'source-over',
-            mirror: false,
-            scatter: 0
-        };
-
-        // Touch state
+        let params = { width: 2, opacity: 180, mode: 'Horizontal', blend: 'source-over', mirror: false, scatter: 0 };
         let touchDrawing = false;
 
         function setup() {
-            canvas = createCanvas(windowWidth, isMobile ? windowHeight - 280 : windowHeight);
+            canvas = createCanvas(windowWidth, isMobile ? windowHeight - 200 : windowHeight);
             canvas.parent('canvas-container');
+            pixelDensity(Math.min(window.devicePixelRatio || 1, MAX_DPR));
             background(10, 10, 15);
-
-            // Set up drag and drop
             setupDragAndDrop();
-
-            // Desktop: Tweakpane UI (only created if not mobile)
-            if (!isMobile) {
-                setupTweakpane();
-            }
-
-            // Mobile: Setup mobile controls
+            if (!isMobile) setupTweakpane();
             setupMobileControls();
-
-            // Mobile: Setup hint overlay
-            setupHintOverlay();
+            updateButtonStates();
         }
 
         function setupTweakpane() {
-            pane = new Tweakpane.Pane({
-                title: '✦ Design Controls',
-                expanded: true
-            });
-
+            pane = new Tweakpane.Pane({ title: '✦ Design Controls', expanded: true });
             const stretchFolder = pane.addFolder({ title: 'Stretch' });
-            stretchFolder.addInput(params, 'width', {
-                min: 1,
-                max: 100,
-                label: 'Width'
-            });
-            stretchFolder.addInput(params, 'opacity', {
-                min: 0,
-                max: 255,
-                label: 'Alpha'
-            });
-            stretchFolder.addInput(params, 'mode', {
-                options: {
-                    Horizontal: 'Horizontal',
-                    Vertical: 'Vertical'
-                },
-                label: 'Direction'
-            });
-
+            stretchFolder.addInput(params, 'width', { min: 1, max: 100, label: 'Width' });
+            stretchFolder.addInput(params, 'opacity', { min: 0, max: 255, label: 'Alpha' });
+            stretchFolder.addInput(params, 'mode', { options: { Horizontal: 'Horizontal', Vertical: 'Vertical' }, label: 'Direction' });
             const effectsFolder = pane.addFolder({ title: 'Effects' });
-            effectsFolder.addInput(params, 'blend', {
-                options: {
-                    'Normal': 'source-over',
-                    'Screen': 'screen',
-                    'Multiply': 'multiply',
-                    'Difference': 'difference'
-                },
-                label: 'Blend Mode'
-            });
-            effectsFolder.addInput(params, 'mirror', {
-                label: 'Mirror'
-            });
-            effectsFolder.addInput(params, 'scatter', {
-                min: 0,
-                max: 50,
-                label: 'Scatter'
-            });
-
+            effectsFolder.addInput(params, 'blend', { options: { 'Normal': 'source-over', 'Screen': 'screen', 'Multiply': 'multiply', 'Difference': 'difference' }, label: 'Blend Mode' });
+            effectsFolder.addInput(params, 'mirror', { label: 'Mirror' });
+            effectsFolder.addInput(params, 'scatter', { min: 0, max: 50, label: 'Scatter' });
             pane.addSeparator();
-
             const btnClear = pane.addButton({ title: '↺ Reset Canvas' });
-            btnClear.on('click', () => {
-                background(10, 10, 15);
-            });
-
+            btnClear.on('click', resetCanvas);
             const btnSave = pane.addButton({ title: '⬇ Export PNG' });
-            btnSave.on('click', () => {
-                saveCanvas('pixel_stretch_' + Date.now(), 'png');
-            });
+            btnSave.on('click', exportImage);
         }
 
         function setupMobileControls() {
-            // Upload
-            document.getElementById('mobileUploadBtn').addEventListener('click', () => {
-                document.getElementById('mobileFileInput').click();
-            });
+            document.getElementById('mobileUploadBtn').addEventListener('click', () => document.getElementById('mobileFileInput').click());
+            document.getElementById('mobileFileInput').addEventListener('change', (e) => { if (e.target.files.length > 0) handleImageFile(e.target.files[0]); });
+            document.getElementById('mobileResetBtn').addEventListener('click', resetCanvas);
+            document.getElementById('mobileExportBtn').addEventListener('click', exportImage);
 
-            document.getElementById('mobileFileInput').addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleMobileFile(e.target.files[0]);
-                }
-            });
-
-            // Reset
-            document.getElementById('mobileResetBtn').addEventListener('click', () => {
-                background(10, 10, 15);
-            });
-
-            // Export
-            document.getElementById('mobileExportBtn').addEventListener('click', () => {
-                saveCanvas('pixel_stretch_' + Date.now(), 'png');
-            });
-
-            // Width slider
             const widthSlider = document.getElementById('mobileWidthSlider');
-            widthSlider.addEventListener('input', (e) => {
-                params.width = parseInt(e.target.value);
-                document.getElementById('mobileWidthValue').textContent = params.width;
-            });
-
-            // Alpha slider
+            widthSlider.addEventListener('input', (e) => { params.width = parseInt(e.target.value); document.getElementById('mobileWidthValue').textContent = params.width; });
             const alphaSlider = document.getElementById('mobileAlphaSlider');
-            alphaSlider.addEventListener('input', (e) => {
-                params.opacity = parseInt(e.target.value);
-                document.getElementById('mobileAlphaValue').textContent = params.opacity;
-            });
+            alphaSlider.addEventListener('input', (e) => { params.opacity = parseInt(e.target.value); document.getElementById('mobileAlphaValue').textContent = params.opacity; });
 
-            // Scatter slider
-            const scatterSlider = document.getElementById('mobileScatterSlider');
-            scatterSlider.addEventListener('input', (e) => {
-                params.scatter = parseInt(e.target.value);
-                document.getElementById('mobileScatterValue').textContent = params.scatter;
-            });
+            document.getElementById('mobileModeH').addEventListener('click', (e) => { params.mode = 'Horizontal'; e.target.classList.add('active'); document.getElementById('mobileModeV').classList.remove('active'); });
+            document.getElementById('mobileModeV').addEventListener('click', (e) => { params.mode = 'Vertical'; e.target.classList.add('active'); document.getElementById('mobileModeH').classList.remove('active'); });
+            document.getElementById('mobileMirrorToggle').addEventListener('click', (e) => { params.mirror = !params.mirror; e.target.classList.toggle('active'); });
+        }
 
-            // Mode toggles
-            document.getElementById('mobileModeH').addEventListener('click', (e) => {
-                params.mode = 'Horizontal';
-                e.target.classList.add('active');
-                document.getElementById('mobileModeV').classList.remove('active');
-            });
+        function updateButtonStates() {
+            const uploadBtn = document.getElementById('mobileUploadBtn');
+            const exportBtn = document.getElementById('mobileExportBtn');
+            if (hasImage) {
+                uploadBtn.classList.add('secondary');
+                exportBtn.classList.remove('secondary');
+            } else {
+                uploadBtn.classList.remove('secondary');
+                exportBtn.classList.add('secondary');
+            }
+        }
 
-            document.getElementById('mobileModeV').addEventListener('click', (e) => {
-                params.mode = 'Vertical';
-                e.target.classList.add('active');
-                document.getElementById('mobileModeH').classList.remove('active');
-            });
-
-            // Mirror toggle
-            document.getElementById('mobileMirrorToggle').addEventListener('click', (e) => {
-                params.mirror = !params.mirror;
-                e.target.classList.toggle('active');
-            });
-
-            // Blend mode toggles
-            const blendButtons = {
-                'mobileBlendNormal': 'source-over',
-                'mobileBlendScreen': 'screen',
-                'mobileBlendDiff': 'difference'
-            };
-
-            Object.keys(blendButtons).forEach(id => {
-                document.getElementById(id).addEventListener('click', (e) => {
-                    params.blend = blendButtons[id];
-                    Object.keys(blendButtons).forEach(bid => {
-                        document.getElementById(bid).classList.remove('active');
-                    });
-                    e.target.classList.add('active');
+        function handleImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadImage(e.target.result, (loadedImg) => {
+                    let w = loadedImg.width, h = loadedImg.height;
+                    if (w > MAX_IMAGE_DIMENSION || h > MAX_IMAGE_DIMENSION) {
+                        const ratio = Math.min(MAX_IMAGE_DIMENSION / w, MAX_IMAGE_DIMENSION / h);
+                        w = Math.floor(w * ratio); h = Math.floor(h * ratio);
+                        const tempGraphics = createGraphics(w, h);
+                        tempGraphics.image(loadedImg, 0, 0, w, h);
+                        img = tempGraphics.get();
+                        tempGraphics.remove();
+                    } else {
+                        img = loadedImg;
+                    }
+                    analyzeAndApplyDefaults(img);
+                    renderBaseLayer();
+                    hasImage = true;
+                    updateButtonStates();
                 });
-            });
-
-            // Settings toggle
-            document.getElementById('mobileSettingsToggle').addEventListener('click', (e) => {
-                const toggle = e.currentTarget;
-                const settings = document.getElementById('mobileAdvancedSettings');
-                toggle.classList.toggle('expanded');
-                settings.classList.toggle('visible');
-            });
+            };
+            reader.readAsDataURL(file);
         }
 
-        function setupHintOverlay() {
-            const hintOverlay = document.getElementById('hintOverlay');
-            const hasSeenHint = localStorage.getItem('pixelStretcherHintSeen');
+        function analyzeAndApplyDefaults(image) {
+            // Analyze image brightness and adjust defaults
+            image.loadPixels();
+            let totalBrightness = 0;
+            const sampleSize = Math.min(1000, image.pixels.length / 4);
+            const step = Math.floor(image.pixels.length / 4 / sampleSize);
+            for (let i = 0; i < sampleSize; i++) {
+                const idx = i * step * 4;
+                const r = image.pixels[idx], g = image.pixels[idx + 1], b = image.pixels[idx + 2];
+                totalBrightness += (r + g + b) / 3;
+            }
+            const avgBrightness = totalBrightness / sampleSize;
 
-            if (hasSeenHint) {
-                hintOverlay.classList.add('hidden');
+            // Subtle adjustments based on brightness
+            if (avgBrightness > 180) {
+                params.opacity = 150; // Reduce alpha for bright images
+            } else if (avgBrightness < 60) {
+                params.blend = 'screen'; // Use screen for dark images
+            } else {
+                params.opacity = 180;
+                params.blend = 'source-over';
             }
 
-            document.getElementById('hintDismiss').addEventListener('click', () => {
-                hintOverlay.classList.add('hidden');
-                localStorage.setItem('pixelStretcherHintSeen', 'true');
-            });
-
-            hintOverlay.addEventListener('click', (e) => {
-                if (e.target === hintOverlay) {
-                    hintOverlay.classList.add('hidden');
-                    localStorage.setItem('pixelStretcherHintSeen', 'true');
-                }
-            });
+            // Update mobile sliders if visible
+            if (isMobile) {
+                document.getElementById('mobileAlphaSlider').value = params.opacity;
+                document.getElementById('mobileAlphaValue').textContent = params.opacity;
+            }
         }
 
-        function handleMobileFile(file) {
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    loadImage(e.target.result, (loadedImg) => {
-                        // Downscale for mobile performance
-                        let w = loadedImg.width;
-                        let h = loadedImg.height;
-
-                        if (w > MAX_IMAGE_DIMENSION || h > MAX_IMAGE_DIMENSION) {
-                            const ratio = Math.min(MAX_IMAGE_DIMENSION / w, MAX_IMAGE_DIMENSION / h);
-                            w = Math.floor(w * ratio);
-                            h = Math.floor(h * ratio);
-
-                            // Create downscaled version
-                            const tempGraphics = createGraphics(w, h);
-                            tempGraphics.image(loadedImg, 0, 0, w, h);
-                            img = tempGraphics.get();
-                            tempGraphics.remove();
-                        } else {
-                            img = loadedImg;
-                        }
-                    });
-                };
-                reader.readAsDataURL(file);
+        function renderBaseLayer() {
+            if (!img) return;
+            background(10, 10, 15);
+            // Draw image to fill canvas while maintaining aspect ratio
+            const imgRatio = img.width / img.height;
+            const canvasRatio = width / height;
+            let drawW, drawH, drawX, drawY;
+            if (imgRatio > canvasRatio) {
+                drawW = width; drawH = width / imgRatio;
+                drawX = 0; drawY = (height - drawH) / 2;
+            } else {
+                drawH = height; drawW = height * imgRatio;
+                drawX = (width - drawW) / 2; drawY = 0;
             }
+            image(img, drawX, drawY, drawW, drawH);
+            // Store base layer
+            baseLayer = get();
+        }
+
+        function resetCanvas() {
+            if (hasImage && baseLayer) {
+                image(baseLayer, 0, 0);
+            } else {
+                background(10, 10, 15);
+            }
+        }
+
+        function exportImage() {
+            const timestamp = Date.now();
+            const filename = `pixel_stretch_${timestamp}`;
+
+            if (isMobile) {
+                // Mobile export: create blob and trigger download
+                canvas.elt.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename + '.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('Saved');
+                }, 'image/png');
+            } else {
+                saveCanvas(filename, 'png');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 1500);
+        }
+
+        function startInteraction() {
+            document.body.classList.add('interacting');
+            if (interactionTimeout) clearTimeout(interactionTimeout);
+        }
+
+        function endInteraction() {
+            if (interactionTimeout) clearTimeout(interactionTimeout);
+            interactionTimeout = setTimeout(() => {
+                document.body.classList.remove('interacting');
+            }, 1000);
         }
 
         function setupDragAndDrop() {
             const dropOverlay = document.getElementById('dropOverlay');
-
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                document.body.addEventListener(eventName, preventDefaults, false);
-            });
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            document.body.addEventListener('dragenter', () => {
-                dropOverlay.classList.add('active');
-            });
-
-            document.body.addEventListener('dragleave', (e) => {
-                if (e.relatedTarget === null || !document.body.contains(e.relatedTarget)) {
-                    dropOverlay.classList.remove('active');
-                }
-            });
-
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => document.body.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); }, false));
+            document.body.addEventListener('dragenter', () => dropOverlay.classList.add('active'));
+            document.body.addEventListener('dragleave', (e) => { if (!e.relatedTarget || !document.body.contains(e.relatedTarget)) dropOverlay.classList.remove('active'); });
             document.body.addEventListener('drop', (e) => {
                 dropOverlay.classList.remove('active');
-
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    const file = files[0];
-                    if (file.type.startsWith('image/')) {
-                        if (isMobile) {
-                            handleMobileFile(file);
-                        } else {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                                loadImage(event.target.result, (loadedImg) => {
-                                    img = loadedImg;
-                                });
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    }
-                }
+                if (e.dataTransfer.files.length > 0) handleImageFile(e.dataTransfer.files[0]);
             });
         }
 
-        function handleFile(file) {
-            if (file.type === 'image') {
-                img = loadImage(file.data);
-            }
-        }
+        function handleFile(file) { if (file.type === 'image') loadImage(file.data, (i) => { img = i; analyzeAndApplyDefaults(img); renderBaseLayer(); hasImage = true; updateButtonStates(); }); }
 
         function draw() {
-            // Desktop: mouse interaction
             if (mouseIsPressed && img && !isMobile) {
+                startInteraction();
                 drawStretch(mouseX, mouseY);
             }
         }
 
         function drawStretch(x, y) {
             if (!img) return;
-
             drawingContext.globalCompositeOperation = params.blend;
-
             let scatterX = params.scatter > 0 ? random(-params.scatter, params.scatter) : 0;
             let scatterY = params.scatter > 0 ? random(-params.scatter, params.scatter) : 0;
-
             let imgX = floor(map(x, 0, width, 0, img.width));
             let imgY = floor(map(y, 0, height, 0, img.height));
             imgX = constrain(imgX, 0, img.width - 1);
             imgY = constrain(imgY, 0, img.height - 1);
-
             tint(255, params.opacity);
-
             if (params.mode === 'Horizontal') {
                 let slice = img.get(imgX, 0, 1, img.height);
                 let drawX = x + scatterX;
-                image(slice, drawX, 0 + scatterY, params.width, height);
-
-                if (params.mirror) {
-                    let mirrorX = width - drawX - params.width;
-                    image(slice, mirrorX, 0 + scatterY, params.width, height);
-                }
+                image(slice, drawX, scatterY, params.width, height);
+                if (params.mirror) image(slice, width - drawX - params.width, scatterY, params.width, height);
             } else {
                 let slice = img.get(0, imgY, img.width, 1);
                 let drawY = y + scatterY;
-                image(slice, 0 + scatterX, drawY, width, params.width);
-
-                if (params.mirror) {
-                    let mirrorY = height - drawY - params.width;
-                    image(slice, 0 + scatterX, mirrorY, width, params.width);
-                }
+                image(slice, scatterX, drawY, width, params.width);
+                if (params.mirror) image(slice, scatterX, height - drawY - params.width, width, params.width);
             }
-
             drawingContext.globalCompositeOperation = 'source-over';
         }
 
-        // Touch events for mobile
+        function mouseReleased() { endInteraction(); }
+
         function touchStarted() {
             if (!isMobile || !img) return true;
-
-            // Check if touch is in canvas area (not on controls)
             if (touches.length > 0) {
                 const t = touches[0];
                 const canvasRect = document.getElementById('canvas-container').getBoundingClientRect();
-
                 if (t.y < canvasRect.height) {
                     touchDrawing = true;
-                    drawStretch(t.x, t.y);
-                    return false; // Prevent default
-                }
-            }
-            return true;
-        }
-
-        function touchMoved() {
-            if (!isMobile || !img || !touchDrawing) return true;
-
-            if (touches.length > 0) {
-                const t = touches[0];
-                const canvasRect = document.getElementById('canvas-container').getBoundingClientRect();
-
-                if (t.y < canvasRect.height) {
+                    startInteraction();
                     drawStretch(t.x, t.y);
                     return false;
                 }
@@ -987,44 +698,30 @@
             return true;
         }
 
-        function touchEnded() {
-            touchDrawing = false;
+        function touchMoved() {
+            if (!isMobile || !img || !touchDrawing) return true;
+            if (touches.length > 0) {
+                const t = touches[0];
+                const canvasRect = document.getElementById('canvas-container').getBoundingClientRect();
+                if (t.y < canvasRect.height) { drawStretch(t.x, t.y); return false; }
+            }
             return true;
         }
 
+        function touchEnded() { touchDrawing = false; endInteraction(); return true; }
+
         function keyPressed() {
-            if (key === 'u' || key === 'U') {
-                if (isMobile) {
-                    document.getElementById('mobileFileInput').click();
-                } else {
-                    let input = createFileInput(handleFile);
-                    input.elt.click();
-                }
-            }
-            if (key === 'r' || key === 'R') {
-                background(10, 10, 15);
-            }
-            if (key === 's' || key === 'S') {
-                saveCanvas('pixel_stretch_' + Date.now(), 'png');
-            }
+            if (key === 'u' || key === 'U') { if (isMobile) document.getElementById('mobileFileInput').click(); else { let input = createFileInput(handleFile); input.elt.click(); } }
+            if (key === 'r' || key === 'R') resetCanvas();
+            if (key === 's' || key === 'S') exportImage();
         }
 
         function windowResized() {
             const wasMobile = isMobile;
             isMobile = window.innerWidth < 768;
-
-            if (isMobile) {
-                resizeCanvas(windowWidth, windowHeight - 280);
-            } else {
-                resizeCanvas(windowWidth, windowHeight);
-            }
-
-            // Recreate Tweakpane if switching from mobile to desktop
-            if (wasMobile && !isMobile && !pane) {
-                setupTweakpane();
-            }
-
-            background(10, 10, 15);
+            resizeCanvas(windowWidth, isMobile ? windowHeight - 200 : windowHeight);
+            if (wasMobile && !isMobile && !pane) setupTweakpane();
+            if (hasImage) renderBaseLayer(); else background(10, 10, 15);
         }
     </script>
 </body>
