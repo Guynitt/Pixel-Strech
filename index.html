@@ -495,7 +495,20 @@
 
             // Mobile controls
             document.getElementById('mobileUploadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
-            document.getElementById('mobileExportBtn').addEventListener('click', exportImage);
+
+            // Export button - add both click and touchend for iOS compatibility
+            const mobileExportBtn = document.getElementById('mobileExportBtn');
+            mobileExportBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                exportImage();
+            });
+            mobileExportBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                exportImage();
+            }, { passive: false });
+
             document.getElementById('mobileResetBtn').addEventListener('click', resetCanvas);
 
             document.getElementById('mobileWidthSlider').addEventListener('input', (e) => {
@@ -595,30 +608,23 @@
 
         function mobileExport(filename, exportBtn) {
             try {
-                // Get canvas data URL directly (more reliable than toBlob on iOS)
-                const dataUrl = canvas.elt.toDataURL('image/png');
+                // Use toBlob for iOS (more reliable for blob URL creation)
+                canvas.elt.toBlob(async (blob) => {
+                    if (!blob) {
+                        showToast('Export failed');
+                        resetExportBtn(exportBtn);
+                        return;
+                    }
 
-                if (!dataUrl || dataUrl === 'data:,') {
-                    showToast('Export failed');
-                    resetExportBtn(exportBtn);
-                    return;
-                }
-
-                // Convert data URL to blob
-                fetch(dataUrl)
-                    .then(res => res.blob())
-                    .then(async (blob) => {
+                    try {
                         const file = new File([blob], filename, { type: 'image/png' });
 
                         // Try Web Share API first
                         if (navigator.share && navigator.canShare) {
                             try {
-                                if (navigator.canShare({ files: [file] })) {
-                                    await navigator.share({
-                                        files: [file],
-                                        title: 'Pixel Stretch',
-                                        text: 'Save image'
-                                    });
+                                const shareData = { files: [file], title: 'Pixel Stretch' };
+                                if (navigator.canShare(shareData)) {
+                                    await navigator.share(shareData);
                                     showToast('Ready to save');
                                     resetExportBtn(exportBtn);
                                     return;
@@ -629,47 +635,45 @@
                                     resetExportBtn(exportBtn);
                                     return;
                                 }
-                                // Fall through to window.open
+                                // Fall through to blob URL
                             }
                         }
 
-                        // Fallback: open in new tab for long-press save
-                        openInNewTab(dataUrl, exportBtn);
-                    })
-                    .catch(() => {
-                        // Fallback: open data URL directly
-                        openInNewTab(dataUrl, exportBtn);
-                    });
+                        // Fallback: open blob URL in new tab
+                        openBlobInNewTab(blob, exportBtn);
+
+                    } catch (err) {
+                        showToast('Export failed');
+                        resetExportBtn(exportBtn);
+                    }
+                }, 'image/png');
             } catch (err) {
                 showToast('Export failed');
                 resetExportBtn(exportBtn);
             }
         }
 
-        function openInNewTab(dataUrl, exportBtn) {
+        function openBlobInNewTab(blob, exportBtn) {
             try {
-                const newWindow = window.open();
+                const url = URL.createObjectURL(blob);
+                const newWindow = window.open(url, '_blank');
+
                 if (newWindow) {
-                    newWindow.document.write(`
-                        <html>
-                        <head><title>Pixel Stretch - Save Image</title>
-                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                        <style>
-                            body { margin: 0; background: #0c0c0c; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, sans-serif; }
-                            img { max-width: 100%; max-height: 80vh; }
-                            p { color: rgba(255,255,255,0.5); margin-top: 20px; font-size: 14px; }
-                        </style>
-                        </head>
-                        <body>
-                            <img src="${dataUrl}" alt="Pixel Stretch">
-                            <p>Long-press image to save</p>
-                        </body>
-                        </html>
-                    `);
-                    newWindow.document.close();
                     showToast('Ready to save');
+                    // Revoke after 30 seconds
+                    setTimeout(() => URL.revokeObjectURL(url), 30000);
                 } else {
-                    showToast('Enable popups to save');
+                    // Popup blocked - try alternative approach
+                    // Create a link and show instructions
+                    showToast('Long-press to save');
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 30000);
                 }
             } catch (e) {
                 showToast('Export failed');
