@@ -260,11 +260,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* UI fade during interaction - mobile only */
-        body.interacting .mobile-panel {
-            opacity: 0;
-            pointer-events: none;
-        }
+        /* Panels always visible - no auto-hide */
 
         /* Hide panel elements based on state */
         .panel .upload-section {
@@ -710,7 +706,6 @@
                 const rect = document.getElementById('canvas-container').getBoundingClientRect();
                 if (t.y < rect.height) {
                     touchDrawing = true;
-                    startInteraction();
                     drawStretch(t.x, t.y);
                     return false;
                 }
@@ -728,7 +723,7 @@
             return true;
         }
 
-        function touchEnded() { touchDrawing = false; endInteraction(); return true; }
+        function touchEnded() { touchDrawing = false; return true; }
 
         function keyPressed() {
             if (key === 'u' || key === 'U') document.getElementById('fileInput').click();
