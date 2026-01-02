@@ -408,11 +408,7 @@
                 <input type="range" id="widthSlider" min="1" max="100" value="2">
             </div>
 
-            <div class="control-group">
-                <div class="control-label"><span>Opacity</span><span class="control-value" id="opacityValue">180</span>
-                </div>
-                <input type="range" id="opacitySlider" min="0" max="255" value="180">
-            </div>
+
 
             <div class="toggle-row">
                 <button class="toggle-btn active" id="modeH">Horizontal</button>
@@ -440,17 +436,10 @@
                 <button class="btn" id="mobileResetBtn">Reset</button>
             </div>
 
-            <div class="controls-row">
-                <div class="control-group">
-                    <div class="control-label"><span>Width</span><span class="control-value"
-                            id="mobileWidthValue">2</span></div>
-                    <input type="range" id="mobileWidthSlider" min="1" max="100" value="2">
+            <div class="control-group">
+                <div class="control-label"><span>Width</span><span class="control-value" id="mobileWidthValue">2</span>
                 </div>
-                <div class="control-group">
-                    <div class="control-label"><span>Opacity</span><span class="control-value"
-                            id="mobileOpacityValue">180</span></div>
-                    <input type="range" id="mobileOpacitySlider" min="0" max="255" value="180">
-                </div>
+                <input type="range" id="mobileWidthSlider" min="1" max="100" value="2">
             </div>
 
             <div class="toggle-row">
@@ -498,10 +487,7 @@
                 document.getElementById('widthValue').textContent = params.width;
             });
 
-            document.getElementById('opacitySlider').addEventListener('input', (e) => {
-                params.opacity = parseInt(e.target.value);
-                document.getElementById('opacityValue').textContent = params.opacity;
-            });
+
 
             document.getElementById('modeH').addEventListener('click', (e) => {
                 params.mode = 'Horizontal';
@@ -525,10 +511,7 @@
                 document.getElementById('mobileWidthValue').textContent = params.width;
             });
 
-            document.getElementById('mobileOpacitySlider').addEventListener('input', (e) => {
-                params.opacity = parseInt(e.target.value);
-                document.getElementById('mobileOpacityValue').textContent = params.opacity;
-            });
+
 
             document.getElementById('mobileModeH').addEventListener('click', (e) => {
                 params.mode = 'Horizontal';
@@ -574,7 +557,6 @@
                     } else {
                         img = loadedImg;
                     }
-                    analyzeImage(img);
                     renderBaseLayer();
                     hasImage = true;
                     document.body.classList.add('has-image');
@@ -583,35 +565,7 @@
             reader.readAsDataURL(file);
         }
 
-        function analyzeImage(image) {
-            image.loadPixels();
-            let totalBrightness = 0;
-            const sampleSize = Math.min(500, image.pixels.length / 4);
-            const step = Math.floor(image.pixels.length / 4 / sampleSize);
-            for (let i = 0; i < sampleSize; i++) {
-                const idx = i * step * 4;
-                totalBrightness += (image.pixels[idx] + image.pixels[idx + 1] + image.pixels[idx + 2]) / 3;
-            }
-            const avgBrightness = totalBrightness / sampleSize;
 
-            // Intelligent defaults
-            if (avgBrightness > 180) {
-                params.opacity = 140;
-                params.blend = 'multiply';
-            } else if (avgBrightness < 50) {
-                params.opacity = 200;
-                params.blend = 'screen';
-            } else {
-                params.opacity = 180;
-                params.blend = 'source-over';
-            }
-
-            // Sync sliders
-            document.getElementById('opacitySlider').value = params.opacity;
-            document.getElementById('opacityValue').textContent = params.opacity;
-            document.getElementById('mobileOpacitySlider').value = params.opacity;
-            document.getElementById('mobileOpacityValue').textContent = params.opacity;
-        }
 
         function renderBaseLayer() {
             if (!img) return;
@@ -679,20 +633,24 @@
 
         function drawStretch(x, y) {
             if (!img) return;
-            drawingContext.globalCompositeOperation = params.blend;
+
+            // Pure pixel displacement - no blending, no opacity modification
+            noTint();
+
             let imgX = floor(map(x, 0, width, 0, img.width));
             let imgY = floor(map(y, 0, height, 0, img.height));
             imgX = constrain(imgX, 0, img.width - 1);
             imgY = constrain(imgY, 0, img.height - 1);
-            tint(255, params.opacity);
+
             if (params.mode === 'Horizontal') {
+                // Get vertical slice and stretch horizontally
                 let slice = img.get(imgX, 0, 1, img.height);
                 image(slice, x, 0, params.width, height);
             } else {
+                // Get horizontal slice and stretch vertically
                 let slice = img.get(0, imgY, img.width, 1);
                 image(slice, 0, y, width, params.width);
             }
-            drawingContext.globalCompositeOperation = 'source-over';
         }
 
         function mouseReleased() {
