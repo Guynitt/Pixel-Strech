@@ -3,16 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Pixel Stretcher v2.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tweakpane@3.0.7/dist/tweakpane.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -21,17 +25,20 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow: hidden;
             min-height: 100vh;
+            min-height: 100dvh;
         }
 
         #canvas-container {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             cursor: crosshair;
+            touch-action: none;
         }
 
-        /* Custom crosshair cursor */
         #canvas-container canvas {
             cursor: crosshair;
+            touch-action: none;
         }
 
         .ui-label {
@@ -218,10 +225,302 @@
             color: #667eea !important;
         }
 
-        /* Separator styling */
         .tp-sprv_s {
             background: rgba(255, 255, 255, 0.06) !important;
             margin: 8px 0 !important;
+        }
+
+        /* ========================================
+           MOBILE STYLES (< 768px)
+           ======================================== */
+
+        /* Mobile Control Panel - Hidden by default */
+        .mobile-panel {
+            display: none;
+        }
+
+        /* Hint Overlay */
+        .hint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .hint-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .hint-content {
+            text-align: center;
+            padding: 32px;
+            max-width: 320px;
+        }
+
+        .hint-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+
+        .hint-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .hint-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .hint-dismiss {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 767px) {
+            body {
+                touch-action: none;
+            }
+
+            #canvas-container {
+                height: calc(100dvh - 280px);
+                height: calc(100vh - 280px);
+            }
+
+            /* Hide Tweakpane on mobile */
+            .tp-dfwv {
+                display: none !important;
+            }
+
+            /* Hide desktop labels on mobile */
+            .ui-label,
+            .ui-credit {
+                display: none;
+            }
+
+            /* Show mobile panel */
+            .mobile-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(15, 15, 20, 0.95);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
+                padding: 16px;
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+                z-index: 100;
+            }
+
+            /* Show hint overlay on mobile */
+            .hint-overlay {
+                display: flex;
+            }
+
+            .button-row {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn {
+                flex: 1;
+                min-height: 48px;
+                border: none;
+                border-radius: 12px;
+                font-family: inherit;
+                font-size: 13px;
+                font-weight: 500;
+                letter-spacing: 0.5px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: all 0.2s ease;
+                touch-action: manipulation;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            .btn-primary:active {
+                transform: scale(0.97);
+            }
+
+            .btn-secondary {
+                background: rgba(255, 255, 255, 0.08);
+                color: rgba(255, 255, 255, 0.9);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .btn-secondary:active {
+                background: rgba(255, 255, 255, 0.12);
+                transform: scale(0.97);
+            }
+
+            .controls-row {
+                display: flex;
+                gap: 12px;
+            }
+
+            .control-group {
+                flex: 1;
+            }
+
+            .control-label {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 6px;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            .control-value {
+                color: rgba(255, 255, 255, 0.8);
+                font-weight: 500;
+            }
+
+            input[type="range"] {
+                width: 100%;
+                height: 44px;
+                -webkit-appearance: none;
+                appearance: none;
+                background: transparent;
+                cursor: pointer;
+            }
+
+            input[type="range"]::-webkit-slider-track {
+                height: 6px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 24px;
+                height: 24px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                margin-top: -9px;
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            }
+
+            input[type="range"]::-moz-range-track {
+                height: 6px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+                border: none;
+            }
+
+            input[type="range"]::-moz-range-thumb {
+                width: 24px;
+                height: 24px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                border: none;
+            }
+
+            .toggle-row {
+                display: flex;
+                gap: 8px;
+            }
+
+            .toggle-btn {
+                flex: 1;
+                min-height: 44px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.05);
+                color: rgba(255, 255, 255, 0.6);
+                font-family: inherit;
+                font-size: 12px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                touch-action: manipulation;
+            }
+
+            .toggle-btn.active {
+                background: rgba(102, 126, 234, 0.2);
+                border-color: rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
+            .toggle-btn:active {
+                transform: scale(0.97);
+            }
+
+            .settings-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                padding: 8px;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: rgba(255, 255, 255, 0.4);
+                cursor: pointer;
+                border: none;
+                background: none;
+            }
+
+            .settings-toggle-icon {
+                transition: transform 0.3s ease;
+            }
+
+            .settings-toggle.expanded .settings-toggle-icon {
+                transform: rotate(180deg);
+            }
+
+            .advanced-settings {
+                display: none;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .advanced-settings.visible {
+                display: flex;
+            }
+
+            .mobile-credit {
+                text-align: center;
+                font-size: 9px;
+                letter-spacing: 0.5px;
+                color: rgba(255, 255, 255, 0.25);
+                text-transform: uppercase;
+                padding-top: 8px;
+            }
         }
     </style>
 </head>
@@ -239,10 +538,100 @@
         AI Creative Coding Experiment _02 · Created by <span>Guy Nittenberg</span>
     </div>
 
+    <!-- Mobile-Only Panel -->
+    <div class="mobile-panel" id="mobilePanel">
+        <div class="button-row">
+            <button class="btn btn-primary" id="mobileUploadBtn">
+                <span>📷</span> Upload
+            </button>
+            <button class="btn btn-secondary" id="mobileResetBtn">
+                <span>↺</span> Reset
+            </button>
+            <button class="btn btn-secondary" id="mobileExportBtn">
+                <span>⬇</span> Export
+            </button>
+        </div>
+
+        <div class="controls-row">
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Width</span>
+                    <span class="control-value" id="mobileWidthValue">2</span>
+                </div>
+                <input type="range" id="mobileWidthSlider" min="1" max="100" value="2">
+            </div>
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Alpha</span>
+                    <span class="control-value" id="mobileAlphaValue">180</span>
+                </div>
+                <input type="range" id="mobileAlphaSlider" min="0" max="255" value="180">
+            </div>
+        </div>
+
+        <div class="toggle-row">
+            <button class="toggle-btn active" id="mobileModeH">Horizontal</button>
+            <button class="toggle-btn" id="mobileModeV">Vertical</button>
+        </div>
+
+        <button class="settings-toggle" id="mobileSettingsToggle">
+            <span>More Settings</span>
+            <span class="settings-toggle-icon">▼</span>
+        </button>
+
+        <div class="advanced-settings" id="mobileAdvancedSettings">
+            <div class="controls-row">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Scatter</span>
+                        <span class="control-value" id="mobileScatterValue">0</span>
+                    </div>
+                    <input type="range" id="mobileScatterSlider" min="0" max="50" value="0">
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <button class="toggle-btn" id="mobileMirrorToggle">Mirror</button>
+                <button class="toggle-btn active" id="mobileBlendNormal">Normal</button>
+                <button class="toggle-btn" id="mobileBlendScreen">Screen</button>
+                <button class="toggle-btn" id="mobileBlendDiff">Diff</button>
+            </div>
+        </div>
+
+        <div class="mobile-credit">
+            Experiment _02 · Guy Nittenberg
+        </div>
+    </div>
+
+    <!-- Mobile Hint Overlay -->
+    <div class="hint-overlay" id="hintOverlay">
+        <div class="hint-content">
+            <div class="hint-icon">✨</div>
+            <div class="hint-title">Pixel Stretcher</div>
+            <div class="hint-text">
+                Tap <strong>Upload</strong> to load an image, then drag on the canvas to create stunning pixel-stretch
+                effects.
+            </div>
+            <button class="hint-dismiss" id="hintDismiss">Got It</button>
+        </div>
+    </div>
+
+    <!-- Hidden file input for mobile -->
+    <input type="file" id="mobileFileInput" accept="image/*" style="display: none;">
+
     <script>
+        // ============================================
+        // Configuration
+        // ============================================
+        const MAX_IMAGE_DIMENSION = 2048;
+        const MAX_DPR = 2;
+
         let img;
+        let originalImg; // Store original for mobile downscaling
         let canvas;
         let pane;
+        let isMobile = window.innerWidth < 768;
+
         let params = {
             width: 2,
             opacity: 180,
@@ -252,21 +641,35 @@
             scatter: 0
         };
 
+        // Touch state
+        let touchDrawing = false;
+
         function setup() {
-            canvas = createCanvas(windowWidth, windowHeight);
+            canvas = createCanvas(windowWidth, isMobile ? windowHeight - 280 : windowHeight);
             canvas.parent('canvas-container');
             background(10, 10, 15);
 
             // Set up drag and drop
             setupDragAndDrop();
 
-            // Tweakpane UI
+            // Desktop: Tweakpane UI (only created if not mobile)
+            if (!isMobile) {
+                setupTweakpane();
+            }
+
+            // Mobile: Setup mobile controls
+            setupMobileControls();
+
+            // Mobile: Setup hint overlay
+            setupHintOverlay();
+        }
+
+        function setupTweakpane() {
             pane = new Tweakpane.Pane({
                 title: '✦ Design Controls',
                 expanded: true
             });
 
-            // Stretch Settings Folder
             const stretchFolder = pane.addFolder({ title: 'Stretch' });
             stretchFolder.addInput(params, 'width', {
                 min: 1,
@@ -286,7 +689,6 @@
                 label: 'Direction'
             });
 
-            // Effects Folder
             const effectsFolder = pane.addFolder({ title: 'Effects' });
             effectsFolder.addInput(params, 'blend', {
                 options: {
@@ -306,7 +708,6 @@
                 label: 'Scatter'
             });
 
-            // Actions
             pane.addSeparator();
 
             const btnClear = pane.addButton({ title: '↺ Reset Canvas' });
@@ -320,11 +721,146 @@
             });
         }
 
+        function setupMobileControls() {
+            // Upload
+            document.getElementById('mobileUploadBtn').addEventListener('click', () => {
+                document.getElementById('mobileFileInput').click();
+            });
+
+            document.getElementById('mobileFileInput').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleMobileFile(e.target.files[0]);
+                }
+            });
+
+            // Reset
+            document.getElementById('mobileResetBtn').addEventListener('click', () => {
+                background(10, 10, 15);
+            });
+
+            // Export
+            document.getElementById('mobileExportBtn').addEventListener('click', () => {
+                saveCanvas('pixel_stretch_' + Date.now(), 'png');
+            });
+
+            // Width slider
+            const widthSlider = document.getElementById('mobileWidthSlider');
+            widthSlider.addEventListener('input', (e) => {
+                params.width = parseInt(e.target.value);
+                document.getElementById('mobileWidthValue').textContent = params.width;
+            });
+
+            // Alpha slider
+            const alphaSlider = document.getElementById('mobileAlphaSlider');
+            alphaSlider.addEventListener('input', (e) => {
+                params.opacity = parseInt(e.target.value);
+                document.getElementById('mobileAlphaValue').textContent = params.opacity;
+            });
+
+            // Scatter slider
+            const scatterSlider = document.getElementById('mobileScatterSlider');
+            scatterSlider.addEventListener('input', (e) => {
+                params.scatter = parseInt(e.target.value);
+                document.getElementById('mobileScatterValue').textContent = params.scatter;
+            });
+
+            // Mode toggles
+            document.getElementById('mobileModeH').addEventListener('click', (e) => {
+                params.mode = 'Horizontal';
+                e.target.classList.add('active');
+                document.getElementById('mobileModeV').classList.remove('active');
+            });
+
+            document.getElementById('mobileModeV').addEventListener('click', (e) => {
+                params.mode = 'Vertical';
+                e.target.classList.add('active');
+                document.getElementById('mobileModeH').classList.remove('active');
+            });
+
+            // Mirror toggle
+            document.getElementById('mobileMirrorToggle').addEventListener('click', (e) => {
+                params.mirror = !params.mirror;
+                e.target.classList.toggle('active');
+            });
+
+            // Blend mode toggles
+            const blendButtons = {
+                'mobileBlendNormal': 'source-over',
+                'mobileBlendScreen': 'screen',
+                'mobileBlendDiff': 'difference'
+            };
+
+            Object.keys(blendButtons).forEach(id => {
+                document.getElementById(id).addEventListener('click', (e) => {
+                    params.blend = blendButtons[id];
+                    Object.keys(blendButtons).forEach(bid => {
+                        document.getElementById(bid).classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+                });
+            });
+
+            // Settings toggle
+            document.getElementById('mobileSettingsToggle').addEventListener('click', (e) => {
+                const toggle = e.currentTarget;
+                const settings = document.getElementById('mobileAdvancedSettings');
+                toggle.classList.toggle('expanded');
+                settings.classList.toggle('visible');
+            });
+        }
+
+        function setupHintOverlay() {
+            const hintOverlay = document.getElementById('hintOverlay');
+            const hasSeenHint = localStorage.getItem('pixelStretcherHintSeen');
+
+            if (hasSeenHint) {
+                hintOverlay.classList.add('hidden');
+            }
+
+            document.getElementById('hintDismiss').addEventListener('click', () => {
+                hintOverlay.classList.add('hidden');
+                localStorage.setItem('pixelStretcherHintSeen', 'true');
+            });
+
+            hintOverlay.addEventListener('click', (e) => {
+                if (e.target === hintOverlay) {
+                    hintOverlay.classList.add('hidden');
+                    localStorage.setItem('pixelStretcherHintSeen', 'true');
+                }
+            });
+        }
+
+        function handleMobileFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    loadImage(e.target.result, (loadedImg) => {
+                        // Downscale for mobile performance
+                        let w = loadedImg.width;
+                        let h = loadedImg.height;
+
+                        if (w > MAX_IMAGE_DIMENSION || h > MAX_IMAGE_DIMENSION) {
+                            const ratio = Math.min(MAX_IMAGE_DIMENSION / w, MAX_IMAGE_DIMENSION / h);
+                            w = Math.floor(w * ratio);
+                            h = Math.floor(h * ratio);
+
+                            // Create downscaled version
+                            const tempGraphics = createGraphics(w, h);
+                            tempGraphics.image(loadedImg, 0, 0, w, h);
+                            img = tempGraphics.get();
+                            tempGraphics.remove();
+                        } else {
+                            img = loadedImg;
+                        }
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function setupDragAndDrop() {
             const dropOverlay = document.getElementById('dropOverlay');
-            const canvasContainer = document.getElementById('canvas-container');
 
-            // Prevent default drag behaviors
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 document.body.addEventListener(eventName, preventDefaults, false);
             });
@@ -334,7 +870,6 @@
                 e.stopPropagation();
             }
 
-            // Show overlay on drag enter
             document.body.addEventListener('dragenter', () => {
                 dropOverlay.classList.add('active');
             });
@@ -345,7 +880,6 @@
                 }
             });
 
-            // Handle drop
             document.body.addEventListener('drop', (e) => {
                 dropOverlay.classList.remove('active');
 
@@ -353,14 +887,17 @@
                 if (files.length > 0) {
                     const file = files[0];
                     if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            loadImage(event.target.result, (loadedImg) => {
-                                img = loadedImg;
-                                console.log('Image loaded via drag & drop');
-                            });
-                        };
-                        reader.readAsDataURL(file);
+                        if (isMobile) {
+                            handleMobileFile(file);
+                        } else {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                loadImage(event.target.result, (loadedImg) => {
+                                    img = loadedImg;
+                                });
+                            };
+                            reader.readAsDataURL(file);
+                        }
                     }
                 }
             });
@@ -373,68 +910,120 @@
         }
 
         function draw() {
-            if (mouseIsPressed && img) {
-                // Apply blend mode
-                drawingContext.globalCompositeOperation = params.blend;
-
-                // Calculate base position with scatter
-                let scatterX = params.scatter > 0 ? random(-params.scatter, params.scatter) : 0;
-                let scatterY = params.scatter > 0 ? random(-params.scatter, params.scatter) : 0;
-
-                // Calculation for pixel sampling
-                let imgX = floor(map(mouseX, 0, width, 0, img.width));
-                let imgY = floor(map(mouseY, 0, height, 0, img.height));
-                imgX = constrain(imgX, 0, img.width - 1);
-                imgY = constrain(imgY, 0, img.height - 1);
-
-                tint(255, params.opacity);
-
-                if (params.mode === 'Horizontal') {
-                    // Grab a vertical slice and stretch it sideways
-                    let slice = img.get(imgX, 0, 1, img.height);
-                    let drawX = mouseX + scatterX;
-                    image(slice, drawX, 0 + scatterY, params.width, height);
-
-                    // Mirror mode
-                    if (params.mirror) {
-                        let mirrorX = width - drawX - params.width;
-                        image(slice, mirrorX, 0 + scatterY, params.width, height);
-                    }
-                } else {
-                    // Grab a horizontal slice and stretch it vertically
-                    let slice = img.get(0, imgY, img.width, 1);
-                    let drawY = mouseY + scatterY;
-                    image(slice, 0 + scatterX, drawY, width, params.width);
-
-                    // Mirror mode (vertical mirror for vertical stretching)
-                    if (params.mirror) {
-                        let mirrorY = height - drawY - params.width;
-                        image(slice, 0 + scatterX, mirrorY, width, params.width);
-                    }
-                }
-
-                // Reset blend mode
-                drawingContext.globalCompositeOperation = 'source-over';
+            // Desktop: mouse interaction
+            if (mouseIsPressed && img && !isMobile) {
+                drawStretch(mouseX, mouseY);
             }
+        }
+
+        function drawStretch(x, y) {
+            if (!img) return;
+
+            drawingContext.globalCompositeOperation = params.blend;
+
+            let scatterX = params.scatter > 0 ? random(-params.scatter, params.scatter) : 0;
+            let scatterY = params.scatter > 0 ? random(-params.scatter, params.scatter) : 0;
+
+            let imgX = floor(map(x, 0, width, 0, img.width));
+            let imgY = floor(map(y, 0, height, 0, img.height));
+            imgX = constrain(imgX, 0, img.width - 1);
+            imgY = constrain(imgY, 0, img.height - 1);
+
+            tint(255, params.opacity);
+
+            if (params.mode === 'Horizontal') {
+                let slice = img.get(imgX, 0, 1, img.height);
+                let drawX = x + scatterX;
+                image(slice, drawX, 0 + scatterY, params.width, height);
+
+                if (params.mirror) {
+                    let mirrorX = width - drawX - params.width;
+                    image(slice, mirrorX, 0 + scatterY, params.width, height);
+                }
+            } else {
+                let slice = img.get(0, imgY, img.width, 1);
+                let drawY = y + scatterY;
+                image(slice, 0 + scatterX, drawY, width, params.width);
+
+                if (params.mirror) {
+                    let mirrorY = height - drawY - params.width;
+                    image(slice, 0 + scatterX, mirrorY, width, params.width);
+                }
+            }
+
+            drawingContext.globalCompositeOperation = 'source-over';
+        }
+
+        // Touch events for mobile
+        function touchStarted() {
+            if (!isMobile || !img) return true;
+
+            // Check if touch is in canvas area (not on controls)
+            if (touches.length > 0) {
+                const t = touches[0];
+                const canvasRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+                if (t.y < canvasRect.height) {
+                    touchDrawing = true;
+                    drawStretch(t.x, t.y);
+                    return false; // Prevent default
+                }
+            }
+            return true;
+        }
+
+        function touchMoved() {
+            if (!isMobile || !img || !touchDrawing) return true;
+
+            if (touches.length > 0) {
+                const t = touches[0];
+                const canvasRect = document.getElementById('canvas-container').getBoundingClientRect();
+
+                if (t.y < canvasRect.height) {
+                    drawStretch(t.x, t.y);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function touchEnded() {
+            touchDrawing = false;
+            return true;
         }
 
         function keyPressed() {
             if (key === 'u' || key === 'U') {
-                let input = createFileInput(handleFile);
-                input.elt.click();
+                if (isMobile) {
+                    document.getElementById('mobileFileInput').click();
+                } else {
+                    let input = createFileInput(handleFile);
+                    input.elt.click();
+                }
             }
-            // Quick reset with 'R'
             if (key === 'r' || key === 'R') {
                 background(10, 10, 15);
             }
-            // Quick save with 'S'
             if (key === 's' || key === 'S') {
                 saveCanvas('pixel_stretch_' + Date.now(), 'png');
             }
         }
 
         function windowResized() {
-            resizeCanvas(windowWidth, windowHeight);
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth < 768;
+
+            if (isMobile) {
+                resizeCanvas(windowWidth, windowHeight - 280);
+            } else {
+                resizeCanvas(windowWidth, windowHeight);
+            }
+
+            // Recreate Tweakpane if switching from mobile to desktop
+            if (wasMobile && !isMobile && !pane) {
+                setupTweakpane();
+            }
+
             background(10, 10, 15);
         }
     </script>
